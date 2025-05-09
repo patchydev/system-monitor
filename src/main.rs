@@ -1,14 +1,21 @@
 mod plugin;
-mod plugins {
-    mod default {
-        mod memory;
-    }
-}
+mod plugins;
 
-use sysinfo::System;
+use plugin::Registry;
+use plugins::default::memory::MemoryPlugin;
 
 fn main() {
-    let system = System::new_all();
+    let mut registry = Registry::new();
 
-    println!("{}", system.free_memory())
+    registry.register(MemoryPlugin::new());
+
+    let all = registry.collect_all();
+
+    for (name, metrics) in all {
+        println!("[{}]", name);
+
+        for metric in metrics {
+            println!("{}: {:.2} {}", metric.name, metric.value, metric.unit);
+        }
+    }
 }

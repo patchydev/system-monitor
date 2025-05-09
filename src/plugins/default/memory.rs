@@ -68,7 +68,7 @@ impl Plugin for MemoryPlugin {
             metrics.push(Metric {
                 name: "used_swap".to_string(),
                 value: used_swap,
-                unit: "MB".to_string,
+                unit: "MB".to_string(),
             });
 
             let swap_percent = (used_swap / total_swap) * 100.0;
