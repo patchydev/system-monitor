@@ -12,7 +12,10 @@ impl MemoryPlugin {
     pub fn new() -> Self {
         let mut system = System::new();
         system.refresh_memory();
-        Self { system, show_swap: true }
+        Self {
+            system,
+            show_swap: true,
+        }
     }
 
     fn bytes_to_mb(bytes: u64) -> f64 {

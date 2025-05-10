@@ -9,14 +9,16 @@ use plugin::Registry;
 use plugins::default::memory::MemoryPlugin;
 
 fn main() {
-    let config_path = env::args().nth(1).unwrap_or_else(|| "config.toml".to_string());
+    let config_path = env::args()
+        .nth(1)
+        .unwrap_or_else(|| "config.toml".to_string());
 
     let config = match Config::from_file(&config_path) {
         Ok(cfg) => cfg,
         Err(e) => {
             eprintln!("Error loading configuration file: {}", e);
             Config::default()
-        },
+        }
     };
 
     let mut registry = Registry::new();
@@ -35,7 +37,6 @@ fn main() {
                 println!("{}: {:.2} {}", metric.name, metric.value, metric.unit);
             }
         }
-        
 
         thread::sleep(Duration::from_secs(update_interval));
     }

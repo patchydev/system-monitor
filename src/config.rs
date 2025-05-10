@@ -49,14 +49,17 @@ impl Config {
         let mut memory_settings = HashMap::new();
         memory_settings.insert("show_swap".to_string(), "true".to_string());
 
-        plugins.insert("default_memory".to_string(), PluginConfig {
-            enabled: true,
-            settings: memory_settings,
-        });
+        plugins.insert(
+            "default_memory".to_string(),
+            PluginConfig {
+                enabled: true,
+                settings: memory_settings,
+            },
+        );
 
         Config {
             monitor: SysMonitorConfig { update_inverval: 2 },
-            plugins
+            plugins,
         }
     }
 }

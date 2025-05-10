@@ -23,12 +23,22 @@ pub struct Registry {
 
 impl Registry {
     pub fn new() -> Self {
-        Self { plugins: Vec::new() }
+        Self {
+            plugins: Vec::new(),
+        }
     }
 
-    pub fn register<P: Plugin + 'static>(&mut self, mut plugin: P, settings: HashMap<String, String>) -> Result<(), String> {
+    pub fn register<P: Plugin + 'static>(
+        &mut self,
+        mut plugin: P,
+        settings: HashMap<String, String>,
+    ) -> Result<(), String> {
         if let Err(e) = plugin.init(settings) {
-            return Err(format!("Failed to initialize plugin {}: {}", plugin.name(), e))
+            return Err(format!(
+                "Failed to initialize plugin {}: {}",
+                plugin.name(),
+                e
+            ));
         }
         self.plugins.push(Box::new(plugin));
         Ok(())
