@@ -1,16 +1,18 @@
 use crate::plugin::{Metric, Plugin};
+use std::collections::HashMap;
 use sysinfo::System;
 
 #[derive(Debug)]
 pub struct MemoryPlugin {
     system: System,
+    show_swap: bool,
 }
 
 impl MemoryPlugin {
     pub fn new() -> Self {
         let mut system = System::new();
         system.refresh_memory();
-        Self { system }
+        Self { system, show_swap: true }
     }
 
     fn bytes_to_mb(bytes: u64) -> f64 {
@@ -21,6 +23,18 @@ impl MemoryPlugin {
 impl Plugin for MemoryPlugin {
     fn name(&self) -> &str {
         "Memory"
+    }
+
+    fn id(&self) -> &str {
+        "default_memory"
+    }
+
+    fn init(&mut self, settings: HashMap<String, String>) -> Result<(), String> {
+        if let Some(show_swap) = settings.get("show_swap") {
+            self.show_swap = show_swap.to_lowercase() == "true";
+        }
+
+        Ok(())
     }
 
     fn collect(&mut self) -> Vec<Metric> {
@@ -56,27 +70,29 @@ impl Plugin for MemoryPlugin {
             unit: "%".to_string(),
         });
 
-        let total_swap = Self::bytes_to_mb(self.system.total_swap());
-        if total_swap > 0.0 {
-            metrics.push(Metric {
-                name: "swap_total".to_string(),
-                value: total_swap,
-                unit: "MB".to_string(),
-            });
+        if self.show_swap {
+            let total_swap = Self::bytes_to_mb(self.system.total_swap());
+            if total_swap > 0.0 {
+                metrics.push(Metric {
+                    name: "swap_total".to_string(),
+                    value: total_swap,
+                    unit: "MB".to_string(),
+                });
 
-            let used_swap = Self::bytes_to_mb(self.system.used_swap());
-            metrics.push(Metric {
-                name: "used_swap".to_string(),
-                value: used_swap,
-                unit: "MB".to_string(),
-            });
+                let used_swap = Self::bytes_to_mb(self.system.used_swap());
+                metrics.push(Metric {
+                    name: "used_swap".to_string(),
+                    value: used_swap,
+                    unit: "MB".to_string(),
+                });
 
-            let swap_percent = (used_swap / total_swap) * 100.0;
-            metrics.push(Metric {
-                name: "swap_usage".to_string(),
-                value: swap_percent,
-                unit: "%".to_string(),
-            });
+                let swap_percent = (used_swap / total_swap) * 100.0;
+                metrics.push(Metric {
+                    name: "swap_usage".to_string(),
+                    value: swap_percent,
+                    unit: "%".to_string(),
+                });
+            }
         }
 
         metrics

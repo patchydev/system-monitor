@@ -1,4 +1,4 @@
-use std::fmt::Debug;
+use std::{collections::HashMap, fmt::Debug};
 
 #[derive(Debug, Clone)]
 pub struct Metric {
@@ -9,6 +9,10 @@ pub struct Metric {
 
 pub trait Plugin: Debug {
     fn name(&self) -> &str;
+    fn id(&self) -> &str;
+    fn init(&mut self, settings: HashMap<String, String>) -> Result<(), String> {
+        Ok(())
+    }
     fn collect(&mut self) -> Vec<Metric>;
 }
 
@@ -22,8 +26,12 @@ impl Registry {
         Self { plugins: Vec::new() }
     }
 
-    pub fn register<P: Plugin + 'static>(&mut self, plugin: P) {
-        self.plugins.push(Box::new(plugin))
+    pub fn register<P: Plugin + 'static>(&mut self, mut plugin: P, settings: HashMap<String, String>) -> Result<(), String> {
+        if let Err(e) = plugin.init(settings) {
+            return Err(format!("Failed to initialize plugin {}: {}", plugin.name(), e))
+        }
+        self.plugins.push(Box::new(plugin));
+        Ok(())
     }
 
     pub fn collect_all(&mut self) -> Vec<(String, Vec<Metric>)> {
